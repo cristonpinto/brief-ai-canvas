@@ -11,18 +11,21 @@ import {
   CheckCircle, 
   Clock,
   Image,
-  Github
+  Github,
+  Loader2
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { useToast } from "@/hooks/use-toast";
+import { useDocuments } from "@/hooks/useDocuments";
 
 const Upload = () => {
   const [dragActive, setDragActive] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState([
-    { id: 1, name: "Meeting Notes.pdf", type: "pdf", size: "2.1 MB", status: "completed", progress: 100 },
-    { id: 2, name: "Project Plan.docx", type: "docx", size: "1.8 MB", status: "processing", progress: 65 },
-  ]);
-  const { toast } = useToast();
+  const { 
+    documents, 
+    isLoading, 
+    uploadDocument, 
+    deleteDocument, 
+    isUploading 
+  } = useDocuments();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -52,51 +55,7 @@ const Upload = () => {
 
   const handleFiles = (files: FileList) => {
     Array.from(files).forEach(file => {
-      const newFile = {
-        id: Date.now() + Math.random(),
-        name: file.name,
-        type: file.name.split('.').pop() || 'unknown',
-        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-        status: "uploading" as const,
-        progress: 0
-      };
-
-      setUploadedFiles(prev => [...prev, newFile]);
-
-      // Simulate upload progress
-      const interval = setInterval(() => {
-        setUploadedFiles(prev => 
-          prev.map(f => 
-            f.id === newFile.id 
-              ? { ...f, progress: Math.min(f.progress + 10, 100) }
-              : f
-          )
-        );
-      }, 200);
-
-      // Complete upload after progress reaches 100%
-      setTimeout(() => {
-        clearInterval(interval);
-        setUploadedFiles(prev => 
-          prev.map(f => 
-            f.id === newFile.id 
-              ? { ...f, status: "completed" as const, progress: 100 }
-              : f
-          )
-        );
-        toast({
-          title: "Upload completed",
-          description: `${file.name} has been successfully uploaded and processed.`,
-        });
-      }, 2000);
-    });
-  };
-
-  const deleteFile = (id: number) => {
-    setUploadedFiles(prev => prev.filter(f => f.id !== id));
-    toast({
-      title: "File deleted",
-      description: "The file has been removed from your uploads.",
+      uploadDocument(file);
     });
   };
 
@@ -120,6 +79,14 @@ const Upload = () => {
       default:
         return <Badge className="bg-blue-100 text-blue-800">Uploading</Badge>;
     }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
@@ -150,9 +117,13 @@ const Upload = () => {
               onDragOver={handleDrag}
               onDrop={handleDrop}
             >
-              <UploadIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              {isUploading ? (
+                <Loader2 className="h-12 w-12 text-blue-500 mx-auto mb-4 animate-spin" />
+              ) : (
+                <UploadIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              )}
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Drop files here or click to upload
+                {isUploading ? "Uploading..." : "Drop files here or click to upload"}
               </h3>
               <p className="text-gray-600 mb-4">
                 Upload PDF, DOCX, TXT, or CSV files up to 10MB each
@@ -164,9 +135,10 @@ const Upload = () => {
                 onChange={handleFileInput}
                 className="hidden"
                 id="file-upload"
+                disabled={isUploading}
               />
               <label htmlFor="file-upload">
-                <Button asChild>
+                <Button asChild disabled={isUploading}>
                   <span className="cursor-pointer">Browse Files</span>
                 </Button>
               </label>
@@ -176,15 +148,15 @@ const Upload = () => {
             <div className="mt-6">
               <p className="text-sm font-medium text-gray-700 mb-3">Or import from:</p>
               <div className="flex space-x-4">
-                <Button variant="outline" className="flex items-center">
+                <Button variant="outline" className="flex items-center" disabled>
                   <FileText className="h-4 w-4 mr-2" />
                   Notion
                 </Button>
-                <Button variant="outline" className="flex items-center">
+                <Button variant="outline" className="flex items-center" disabled>
                   <Image className="h-4 w-4 mr-2" />
                   Google Drive
                 </Button>
-                <Button variant="outline" className="flex items-center">
+                <Button variant="outline" className="flex items-center" disabled>
                   <Github className="h-4 w-4 mr-2" />
                   GitHub
                 </Button>
@@ -200,48 +172,50 @@ const Upload = () => {
             <CardDescription>Manage your uploaded documents and their processing status</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {uploadedFiles.map((file) => (
-                <div key={file.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className="flex items-center space-x-2">
-                      {getStatusIcon(file.status)}
-                      <FileText className="h-8 w-8 text-blue-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{file.name}</p>
-                      <div className="flex items-center space-x-4 mt-1">
-                        <span className="text-sm text-gray-500">{file.size}</span>
-                        {file.status === "uploading" && (
-                          <div className="flex items-center space-x-2 flex-1">
-                            <Progress value={file.progress} className="w-24" />
-                            <span className="text-sm text-gray-500">{file.progress}%</span>
-                          </div>
-                        )}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                <span className="ml-2 text-gray-600">Loading documents...</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {documents.map((document) => (
+                  <div key={document.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="flex items-center space-x-2">
+                        {getStatusIcon(document.status)}
+                        <FileText className="h-8 w-8 text-blue-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{document.filename}</p>
+                        <div className="flex items-center space-x-4 mt-1">
+                          <span className="text-sm text-gray-500">{formatFileSize(document.file_size)}</span>
+                          <span className="text-sm text-gray-500">Uploaded {formatDate(document.created_at)}</span>
+                        </div>
                       </div>
                     </div>
+                    <div className="flex items-center space-x-3">
+                      {getStatusBadge(document.status)}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteDocument(document.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    {getStatusBadge(file.status)}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteFile(file.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                ))}
+                
+                {documents.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No files uploaded yet. Upload your first document to get started!</p>
                   </div>
-                </div>
-              ))}
-              
-              {uploadedFiles.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>No files uploaded yet. Upload your first document to get started!</p>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
