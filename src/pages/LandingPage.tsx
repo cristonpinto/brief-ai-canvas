@@ -1,10 +1,31 @@
-
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Upload, MessageSquare, FileText, Users, Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LandingPage = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const features = [
     {
       icon: Upload,
@@ -56,7 +77,7 @@ const LandingPage = () => {
             <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
             <a href="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors">Pricing</a>
             <a href="#about" className="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-            <Link to="/dashboard">
+            <Link to="/auth">
               <Button variant="outline">Sign In</Button>
             </Link>
           </nav>
@@ -77,9 +98,9 @@ const LandingPage = () => {
             Transform how your team processes information with AI-powered insights.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link to="/dashboard">
+            <Link to="/auth">
               <Button size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                Try It Free
+                Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -164,7 +185,7 @@ const LandingPage = () => {
           <p className="text-lg text-gray-600 mb-8">
             Join thousands of teams already using AutoBrief to streamline their workflow.
           </p>
-          <Link to="/dashboard">
+          <Link to="/auth">
             <Button size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
               Start Free Trial
               <ArrowRight className="ml-2 h-5 w-5" />

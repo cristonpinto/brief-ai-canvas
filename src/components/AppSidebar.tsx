@@ -9,14 +9,17 @@ import {
   Settings, 
   Home,
   Menu,
-  X
+  X,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AppSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const navItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
@@ -25,6 +28,10 @@ const AppSidebar = () => {
     { icon: FileOutput, label: "Briefs", path: "/brief-generator" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <div className={cn(
@@ -77,18 +84,33 @@ const AppSidebar = () => {
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200 space-y-2">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">JD</span>
+            <span className="text-white text-sm font-medium">
+              {user?.email?.charAt(0).toUpperCase() || 'U'}
+            </span>
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">John Doe</p>
-              <p className="text-xs text-gray-500 truncate">john@company.com</p>
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {user?.user_metadata?.full_name || 'User'}
+              </p>
+              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
             </div>
           )}
         </div>
+        {!isCollapsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className="w-full justify-start text-gray-600 hover:text-red-600"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
+        )}
       </div>
     </div>
   );
