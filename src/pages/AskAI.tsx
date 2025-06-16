@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,8 @@ import {
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useDocuments } from "@/hooks/useDocuments";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatMessage {
   type: "user" | "assistant";
@@ -31,6 +32,7 @@ const AskAI = () => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [conversations, setConversations] = useState<ChatMessage[]>([]);
+  const { toast } = useToast();
 
   const quickPrompts = [
     { icon: FileOutput, text: "Summarize key points", prompt: "Summarize the key points from the selected documents" },
@@ -60,25 +62,53 @@ const AskAI = () => {
 
     setConversations(prev => [...prev, userMessage]);
     setIsLoading(true);
+    const currentMessage = message.trim();
     setMessage("");
 
-    // TODO: Replace with actual AI API call
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-chat', {
+        body: { 
+          question: currentMessage,
+          documentIds: selectedDocs 
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
       const aiResponse: ChatMessage = {
         type: "assistant",
-        message: "I understand you're asking about the selected documents. This feature will be implemented with AI processing to analyze your documents and provide intelligent responses based on their content.",
+        message: data.answer,
         timestamp: new Date().toLocaleTimeString('en-US', { 
           hour: '2-digit', 
           minute: '2-digit' 
         }),
-        references: selectedDocs.slice(0, 2).map(id => {
-          const doc = documents.find(d => d.id === id);
-          return doc ? `${doc.filename} - Page 1` : 'Document';
+        references: data.sources || []
+      };
+      
+      setConversations(prev => [...prev, aiResponse]);
+      
+    } catch (error) {
+      console.error('AI Chat error:', error);
+      toast({
+        title: "Chat Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+      
+      const errorResponse: ChatMessage = {
+        type: "assistant",
+        message: "Sorry, I encountered an error while processing your question. Please try again.",
+        timestamp: new Date().toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
         })
       };
-      setConversations(prev => [...prev, aiResponse]);
+      setConversations(prev => [...prev, errorResponse]);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleQuickPrompt = (prompt: string) => {
@@ -257,11 +287,11 @@ const AskAI = () => {
                       }`}>
                         <span>{msg.timestamp}</span>
                       </div>
-                      {msg.references && (
+                      {msg.references && msg.references.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                           {msg.references.map((ref, refIndex) => (
                             <Badge key={refIndex} variant="secondary" className="text-xs">
-                              {ref}
+                              📄 {ref}
                             </Badge>
                           ))}
                         </div>

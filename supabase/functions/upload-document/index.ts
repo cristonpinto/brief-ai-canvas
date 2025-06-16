@@ -81,23 +81,30 @@ serve(async (req) => {
       )
     }
 
-    // For now, just mark as completed
-    // In a real implementation, you would:
-    // 1. Extract text content based on file type
-    // 2. Split into chunks
-    // 3. Generate embeddings using OpenAI
-    // 4. Store chunks with embeddings
-    
-    await supabaseClient
-      .from('documents')
-      .update({ status: 'completed' })
-      .eq('id', document.id)
+    // Trigger document processing asynchronously
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession()
+      if (session) {
+        fetch(`https://zahkvkvsfdikdzeftwkr.supabase.co/functions/v1/process-document`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ documentId: document.id }),
+        }).catch(error => {
+          console.error('Failed to trigger processing:', error);
+        });
+      }
+    } catch (error) {
+      console.error('Error triggering processing:', error);
+    }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         document_id: document.id,
-        message: 'File uploaded successfully' 
+        message: 'File uploaded successfully and processing started' 
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
