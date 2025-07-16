@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +11,7 @@ export interface Document {
   status: string;
   created_at: string;
   updated_at: string;
+  upload_path?: string;
 }
 
 export const useDocuments = () => {
@@ -36,7 +36,7 @@ export const useDocuments = () => {
   });
 
   const uploadMutation = useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async (file: File): Promise<string> => {
       if (!user) throw new Error('User not authenticated');
 
       const formData = new FormData();
@@ -58,13 +58,14 @@ export const useDocuments = () => {
         throw new Error(error.error || 'Upload failed');
       }
 
-      return response.json();
+      const result = await response.json();
+      return result.document_id; // Return the document ID
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
       toast({
         title: "Upload completed",
-        description: "Your document has been successfully uploaded and processed.",
+        description: "Your document has been successfully uploaded.",
       });
     },
     onError: (error: Error) => {
@@ -101,12 +102,17 @@ export const useDocuments = () => {
     },
   });
 
+  const refetch = () => {
+    queryClient.invalidateQueries({ queryKey: ['documents'] });
+  };
+
   return {
     documents,
     isLoading,
-    uploadDocument: uploadMutation.mutate,
+    uploadDocument: uploadMutation.mutateAsync, // Use mutateAsync to get the return value
     deleteDocument: deleteMutation.mutate,
     isUploading: uploadMutation.isPending,
     isDeleting: deleteMutation.isPending,
+    refetch,
   };
 };
