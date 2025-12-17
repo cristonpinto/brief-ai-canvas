@@ -39,27 +39,43 @@ export const useDocuments = () => {
     mutationFn: async (file: File): Promise<string> => {
       if (!user) throw new Error('User not authenticated');
 
-      const formData = new FormData();
-      formData.append('file', file);
+      // Generate unique file path
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${file.name}`;
+      const filePath = `${user.id}/${fileName}`;
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No session found');
+      // Upload file to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file);
 
-      const response = await fetch(`https://zahkvkvsfdikdzeftwkr.supabase.co/functions/v1/upload-document`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw new Error(uploadError.message || 'Failed to upload file to storage');
       }
 
-      const result = await response.json();
-      return result.document_id; // Return the document ID
+      // Create document record in database
+      const { data: docData, error: docError } = await supabase
+        .from('documents')
+        .insert({
+          user_id: user.id,
+          filename: file.name,
+          file_type: file.type || 'application/octet-stream',
+          file_size: file.size,
+          storage_path: filePath,
+          status: 'pending' // Will be processed by Edge Function
+        })
+        .select()
+        .single();
+
+      if (docError) {
+        console.error('Database insert error:', docError);
+        // Try to clean up the uploaded file
+        await supabase.storage.from('documents').remove([filePath]);
+        throw new Error(docError.message || 'Failed to save document record');
+      }
+
+      return docData.id;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });

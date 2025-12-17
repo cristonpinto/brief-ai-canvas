@@ -22,36 +22,11 @@ import {
 import { Link } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useDocuments } from "@/hooks/useDocuments";
+import { useBriefs } from "@/hooks/useBriefs";
 
 const Dashboard = () => {
   const { documents, isLoading } = useDocuments();
-
-  const recentBriefs = [
-    { 
-      title: "Q4 Strategic Planning", 
-      tags: ["Strategy", "Planning"], 
-      date: "2024-01-15", 
-      preview: "Key decisions and action items from quarterly planning session...",
-      status: "completed",
-      readTime: "5 min read"
-    },
-    { 
-      title: "Product Roadmap Review", 
-      tags: ["Product", "Roadmap"], 
-      date: "2024-01-14", 
-      preview: "Summary of upcoming features and timeline adjustments...",
-      status: "completed",
-      readTime: "3 min read"
-    },
-    { 
-      title: "Team Retrospective", 
-      tags: ["Team", "Retro"], 
-      date: "2024-01-13", 
-      preview: "Action items and improvements identified during team retrospective...",
-      status: "draft",
-      readTime: "4 min read"
-    },
-  ];
+  const { briefs, isLoading: isLoadingBriefs } = useBriefs();
 
   const stats = [
     {
@@ -241,6 +216,81 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Create New Brief Templates */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <FileText className="h-6 w-6 mr-2 text-blue-500" />
+              Create New Brief
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link to="/brief-generator?type=q4-strategic" className="group">
+                <Card className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 opacity-5 group-hover:opacity-10 transition-opacity"></div>
+                  <CardContent className="relative p-6">
+                    <div className="w-12 h-12 mb-4 bg-blue-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Calendar className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-blue-600 group-hover:text-blue-700 transition-colors">
+                      Q4 Strategic Planning
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Quarterly planning session with strategic goals, budget allocation, and team expansion plans.
+                    </p>
+                    <div className="flex items-center text-sm font-medium text-gray-500 group-hover:text-blue-600 transition-colors">
+                      <Plus className="h-4 w-4 mr-1" />
+                      <span>Create Brief</span>
+                      <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link to="/brief-generator?type=product-roadmap" className="group">
+                <Card className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 opacity-5 group-hover:opacity-10 transition-opacity"></div>
+                  <CardContent className="relative p-6">
+                    <div className="w-12 h-12 mb-4 bg-purple-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <TrendingUp className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-purple-600 group-hover:text-purple-700 transition-colors">
+                      Product Roadmap Review
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Feature prioritization, timeline adjustments, and product development strategy review.
+                    </p>
+                    <div className="flex items-center text-sm font-medium text-gray-500 group-hover:text-purple-600 transition-colors">
+                      <Plus className="h-4 w-4 mr-1" />
+                      <span>Create Brief</span>
+                      <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link to="/brief-generator?type=custom" className="group">
+                <Card className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 opacity-5 group-hover:opacity-10 transition-opacity"></div>
+                  <CardContent className="relative p-6">
+                    <div className="w-12 h-12 mb-4 bg-green-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Sparkles className="h-6 w-6 text-green-600" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-green-600 group-hover:text-green-700 transition-colors">
+                      Custom Brief
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Start with a blank brief and customize it with your own sections and content.
+                    </p>
+                    <div className="flex items-center text-sm font-medium text-gray-500 group-hover:text-green-600 transition-colors">
+                      <Plus className="h-4 w-4 mr-1" />
+                      <span>Create Brief</span>
+                      <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+          </div>
+
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Enhanced Recent Uploads */}
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
@@ -338,59 +388,85 @@ const Dashboard = () => {
                 <div>
                   <CardTitle className="flex items-center text-xl">
                     <Sparkles className="h-5 w-5 mr-2 text-purple-500" />
-                    Recent Briefs
+                    Saved Briefs
                   </CardTitle>
                   <CardDescription className="text-gray-600">
-                    Your generated summaries and insights
+                    Your AI-generated briefs
                   </CardDescription>
                 </div>
                 <Link to="/brief-generator">
                   <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 shadow-lg">
                     <Plus className="h-4 w-4 mr-2" />
-                    Create
+                    New Brief
                   </Button>
                 </Link>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {recentBriefs.map((brief, index) => (
-                    <div key={index} className="group p-5 border border-gray-100 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:border-purple-200 transition-all duration-300 cursor-pointer">
-                      <div className="flex items-start justify-between mb-3">
-                        <h4 className="font-semibold text-gray-900 group-hover:text-purple-700 transition-colors text-lg">
-                          {brief.title}
-                        </h4>
-                        <div className="flex items-center space-x-2">
-                          <Badge className={`${
-                            brief.status === 'completed' 
-                              ? 'bg-green-100 text-green-700 border-green-200' 
-                              : 'bg-orange-100 text-orange-700 border-orange-200'
-                          } border text-xs`}>
-                            {brief.status}
-                          </Badge>
+                {isLoadingBriefs ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                          <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                          </div>
                         </div>
                       </div>
-                      <p className="text-gray-600 mb-4 leading-relaxed">{brief.preview}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex space-x-2">
-                            {brief.tags.map((tag, tagIndex) => (
-                              <Badge key={tagIndex} variant="secondary" className="text-xs bg-gray-100 text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition-colors">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                          <div className="flex items-center text-xs text-gray-500">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {brief.readTime}
+                    ))}
+                  </div>
+                ) : briefs.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500">No briefs yet. Create your first brief!</p>
+                    <Link to="/brief-generator">
+                      <Button variant="outline" className="mt-4">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Brief
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {briefs.slice(0, 3).map((brief) => (
+                      <div key={brief.id} className="group p-4 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-purple-200 transition-all duration-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
+                              <FileText className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                                {brief.title}
+                              </p>
+                              <div className="flex items-center space-x-2 text-xs text-gray-500">
+                                <Badge variant="secondary" className="text-xs">
+                                  {brief.brief_type}
+                                </Badge>
+                                <span>•</span>
+                                <div className="flex items-center space-x-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>{formatDate(brief.created_at)}</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 group-hover:translate-x-1 transition-all">
-                          View →
+                        <p className="text-sm text-gray-600 line-clamp-2 ml-13">
+                          {brief.content[0]?.content.substring(0, 100)}...
+                        </p>
+                      </div>
+                    ))}
+                    {briefs.length > 3 && (
+                      <div className="text-center pt-4">
+                        <Button variant="ghost" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50">
+                          View all {briefs.length} briefs →
                         </Button>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

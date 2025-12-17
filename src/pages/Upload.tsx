@@ -26,8 +26,10 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useDocuments } from "@/hooks/useDocuments";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useQueryClient } from '@tanstack/react-query';
 
 const Upload = () => {
+  const queryClient = useQueryClient();
   const [dragActive, setDragActive] = useState(false);
   const [processingDocs, setProcessingDocs] = useState<Set<string>>(new Set());
   
@@ -100,13 +102,7 @@ const Upload = () => {
           description: `Document has been processed successfully. Created ${data.chunks_created || 0} chunks.`,
         });
         
-        window.location.reload();
-      } else {
-        console.log('Processing completed but no data returned');
-        toast({
-          title: "Processing Completed",
-          description: "Document processing finished.",
-        });
+        queryClient.invalidateQueries({ queryKey: ['documents'] });
       }
     } catch (error) {
       console.error('Processing error:', error);
@@ -121,6 +117,27 @@ const Upload = () => {
         newSet.delete(documentId);
         return newSet;
       });
+    }
+  };
+
+  const processAllPending = async () => {
+    const pendingDocs = documents.filter(doc => doc.status === 'pending');
+    
+    if (pendingDocs.length === 0) {
+      toast({
+        title: "No Pending Documents",
+        description: "All documents are already processed.",
+      });
+      return;
+    }
+
+    toast({
+      title: "Processing Started",
+      description: `Processing ${pendingDocs.length} pending documents...`,
+    });
+
+    for (const doc of pendingDocs) {
+      await processDocument(doc.id);
     }
   };
 
@@ -259,6 +276,17 @@ const Upload = () => {
                   </div>
                 </div>
               </div>
+              {documents.filter(doc => doc.status === 'pending').length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <Button 
+                    onClick={processAllPending}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    Process All Pending Documents
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
