@@ -1,12 +1,14 @@
 # Deployment Guide for Vercel
 
 ## Prerequisites
+
 - GitHub account with this repository pushed
 - Vercel account (sign up at https://vercel.com)
 
 ## Step-by-Step Deployment
 
 ### 1. Push to GitHub (if not already done)
+
 ```bash
 git add .
 git commit -m "Prepare for Vercel deployment"
@@ -16,9 +18,11 @@ git push origin main
 ### 2. Deploy to Vercel
 
 #### Option A: Using Vercel Dashboard (Recommended)
+
 1. Go to https://vercel.com/new
 2. Import your GitHub repository: `cristonpinto/brief-ai-canvas`
 3. Configure the project:
+
    - **Framework Preset:** Vite
    - **Build Command:** `npm run build`
    - **Output Directory:** `dist`
@@ -26,12 +30,14 @@ git push origin main
 
 4. **Add Environment Variables:**
    Click "Environment Variables" and add:
+
    - `VITE_SUPABASE_URL` = `https://dgzbxlcfrbiiszobihnd.supabase.co`
    - `VITE_SUPABASE_ANON_KEY` = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnemJ4bGNmcmJpaXN6b2JpaG5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5NjI5ODQsImV4cCI6MjA4MTUzODk4NH0.H6_p3hNO2S4v0lq74idRZW95-4NMS5jrg4bhU6A0_Z4`
 
 5. Click **"Deploy"**
 
 #### Option B: Using Vercel CLI
+
 ```bash
 # Install Vercel CLI
 npm install -g vercel
@@ -74,6 +80,7 @@ After deployment, you need to add your Vercel domain to Supabase allowed URLs:
 ### 4. Test Your Deployment
 
 Visit your deployed URL and test:
+
 - ✅ User authentication (login/signup)
 - ✅ Document upload
 - ✅ AI chat functionality
@@ -82,14 +89,15 @@ Visit your deployed URL and test:
 
 ## Environment Variables Reference
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `VITE_SUPABASE_URL` | Your Supabase project URL | `https://dgzbxlcfrbiiszobihnd.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | Your Supabase anonymous key | `eyJhbGc...` |
+| Variable                 | Description                 | Example                                    |
+| ------------------------ | --------------------------- | ------------------------------------------ |
+| `VITE_SUPABASE_URL`      | Your Supabase project URL   | `https://dgzbxlcfrbiiszobihnd.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Your Supabase anonymous key | `eyJhbGc...`                               |
 
 ## Automatic Deployments
 
 Vercel will automatically deploy:
+
 - **Production:** Every push to `main` branch
 - **Preview:** Every pull request
 
@@ -104,15 +112,18 @@ Vercel will automatically deploy:
 ## Troubleshooting
 
 ### Build Fails
+
 - Check build logs in Vercel dashboard
 - Ensure all dependencies are in `package.json`
 - Verify environment variables are set correctly
 
 ### Authentication Issues
+
 - Verify Vercel domain is added to Supabase allowed URLs
 - Check that environment variables match Supabase project
 
 ### API/Function Errors
+
 - Ensure Edge Functions are deployed in Supabase
 - Verify CORS settings in Supabase allow your Vercel domain
 
@@ -125,6 +136,7 @@ Vercel will automatically deploy:
 ---
 
 **Deployment Checklist:**
+
 - [ ] Code pushed to GitHub
 - [ ] Vercel project created and linked
 - [ ] Environment variables configured

@@ -1,20 +1,18 @@
-
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
+import {
+  FileOutput,
+  Home,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Settings,
+  Upload,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  FileText, 
-  Upload, 
-  MessageSquare, 
-  FileOutput, 
-  Settings, 
-  Home,
-  Menu,
-  X,
-  LogOut
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
 
 const AppSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -34,18 +32,25 @@ const AppSidebar = () => {
   };
 
   return (
-    <div className={cn(
-      "h-screen bg-white border-r border-gray-200 transition-all duration-300 flex flex-col",
-      isCollapsed ? "w-16" : "w-64"
-    )}>
+    <div
+      className={cn(
+        "h-screen bg-white border-r border-gray-200 transition-all duration-300 flex flex-col",
+        isCollapsed ? "w-16" : "w-64"
+      )}
+    >
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center space-x-2">
-              <FileText className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">AutoBrief</span>
+              <img src="/logo.svg" alt="Brief AI Canvas" className="h-8 w-8" />
+              <span className="text-xl font-bold text-gray-900">
+                Brief AI Canvas
+              </span>
             </div>
+          )}
+          {isCollapsed && (
+            <img src="/logo.png" alt="Brief AI Canvas" className="h-8 w-8" />
           )}
           <Button
             variant="ghost"
@@ -53,7 +58,11 @@ const AppSidebar = () => {
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="p-2"
           >
-            {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+            {isCollapsed ? (
+              <Menu className="h-4 w-4" />
+            ) : (
+              <X className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>
@@ -88,13 +97,13 @@ const AppSidebar = () => {
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white text-sm font-medium">
-              {user?.email?.charAt(0).toUpperCase() || 'U'}
+              {user?.email?.charAt(0).toUpperCase() || "U"}
             </span>
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
-                {user?.user_metadata?.full_name || 'User'}
+                {user?.user_metadata?.full_name || "User"}
               </p>
               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
             </div>

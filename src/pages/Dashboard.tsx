@@ -1,28 +1,32 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { 
-  Plus, 
-  Upload, 
-  MessageSquare, 
-  FileText, 
-  Calendar, 
-  Clock,
-  TrendingUp,
-  Zap,
-  Brain,
-  BarChart3,
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useBriefs } from "@/hooks/useBriefs";
+import { useDocuments } from "@/hooks/useDocuments";
+import {
+  Activity,
   ArrowRight,
-  Sparkles,
+  BarChart3,
+  Brain,
+  Calendar,
   CheckCircle2,
+  FileText,
+  MessageSquare,
+  Plus,
+  Sparkles,
   Timer,
-  Activity
+  TrendingUp,
+  Upload,
+  Zap,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
-import { useDocuments } from "@/hooks/useDocuments";
-import { useBriefs } from "@/hooks/useBriefs";
 
 const Dashboard = () => {
   const { documents, isLoading } = useDocuments();
@@ -36,25 +40,25 @@ const Dashboard = () => {
       trend: "up",
       icon: FileText,
       color: "bg-blue-500",
-      bgColor: "bg-blue-50"
+      bgColor: "bg-blue-50",
     },
     {
       title: "Processed",
-      value: documents.filter(doc => doc.status === 'completed').length,
+      value: documents.filter((doc) => doc.status === "completed").length,
       change: "+8%",
       trend: "up",
       icon: CheckCircle2,
       color: "bg-green-500",
-      bgColor: "bg-green-50"
+      bgColor: "bg-green-50",
     },
     {
       title: "Processing",
-      value: documents.filter(doc => doc.status === 'processing').length,
+      value: documents.filter((doc) => doc.status === "processing").length,
       change: "0%",
       trend: "neutral",
       icon: Timer,
       color: "bg-yellow-500",
-      bgColor: "bg-yellow-50"
+      bgColor: "bg-yellow-50",
     },
     {
       title: "AI Queries",
@@ -63,8 +67,8 @@ const Dashboard = () => {
       trend: "up",
       icon: Brain,
       color: "bg-purple-500",
-      bgColor: "bg-purple-50"
-    }
+      bgColor: "bg-purple-50",
+    },
   ];
 
   const quickActions = [
@@ -76,7 +80,7 @@ const Dashboard = () => {
       color: "from-blue-500 to-blue-600",
       textColor: "text-blue-600",
       bgColor: "bg-blue-50",
-      emoji: "📄"
+      emoji: "📄",
     },
     {
       title: "Ask AI",
@@ -86,7 +90,7 @@ const Dashboard = () => {
       color: "from-green-500 to-green-600",
       textColor: "text-green-600",
       bgColor: "bg-green-50",
-      emoji: "🤖"
+      emoji: "🤖",
     },
     {
       title: "Generate Brief",
@@ -96,7 +100,7 @@ const Dashboard = () => {
       color: "from-purple-500 to-purple-600",
       textColor: "text-purple-600",
       bgColor: "bg-purple-50",
-      emoji: "✨"
+      emoji: "✨",
     },
     {
       title: "Analytics",
@@ -106,45 +110,54 @@ const Dashboard = () => {
       color: "from-orange-500 to-orange-600",
       textColor: "text-orange-600",
       bgColor: "bg-orange-50",
-      emoji: "📊"
-    }
+      emoji: "📊",
+    },
   ];
 
   const getStatusBadge = (status: string) => {
     const badgeStyles = {
       completed: "bg-green-100 text-green-700 border-green-200",
       processing: "bg-yellow-100 text-yellow-700 border-yellow-200",
-      failed: "bg-red-100 text-red-700 border-red-200"
+      failed: "bg-red-100 text-red-700 border-red-200",
     };
-    
+
     return (
-      <Badge className={`${badgeStyles[status as keyof typeof badgeStyles] || badgeStyles.processing} border`}>
-        {status === 'completed' && <CheckCircle2 className="w-3 h-3 mr-1" />}
-        {status === 'processing' && <Timer className="w-3 h-3 mr-1" />}
+      <Badge
+        className={`${
+          badgeStyles[status as keyof typeof badgeStyles] ||
+          badgeStyles.processing
+        } border`}
+      >
+        {status === "completed" && <CheckCircle2 className="w-3 h-3 mr-1" />}
+        {status === "processing" && <Timer className="w-3 h-3 mr-1" />}
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </Badge>
     );
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  const completionRate = documents.length > 0 ? 
-    (documents.filter(doc => doc.status === 'completed').length / documents.length) * 100 : 0;
+  const completionRate =
+    documents.length > 0
+      ? (documents.filter((doc) => doc.status === "completed").length /
+          documents.length) *
+        100
+      : 0;
 
   return (
     <DashboardLayout>
@@ -165,7 +178,9 @@ const Dashboard = () => {
                   <div className="flex items-center mt-4 space-x-6">
                     <div className="flex items-center space-x-2">
                       <Activity className="h-5 w-5 text-green-500" />
-                      <span className="text-sm text-gray-600">All systems operational</span>
+                      <span className="text-sm text-gray-600">
+                        All systems operational
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -182,10 +197,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          
-
-          
-
           {/* Modern Quick Actions */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -196,15 +207,23 @@ const Dashboard = () => {
               {quickActions.map((action, index) => (
                 <Link key={index} to={action.path} className="group">
                   <Card className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden relative">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-5 group-hover:opacity-10 transition-opacity`}></div>
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-5 group-hover:opacity-10 transition-opacity`}
+                    ></div>
                     <CardContent className="relative p-6 text-center">
-                      <div className={`w-16 h-16 mx-auto mb-4 ${action.bgColor} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <div
+                        className={`w-16 h-16 mx-auto mb-4 ${action.bgColor} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                      >
                         <span className="text-2xl">{action.emoji}</span>
                       </div>
-                      <h3 className={`font-bold text-lg mb-2 ${action.textColor} group-hover:text-gray-900 transition-colors`}>
+                      <h3
+                        className={`font-bold text-lg mb-2 ${action.textColor} group-hover:text-gray-900 transition-colors`}
+                      >
                         {action.title}
                       </h3>
-                      <p className="text-gray-600 text-sm mb-4">{action.description}</p>
+                      <p className="text-gray-600 text-sm mb-4">
+                        {action.description}
+                      </p>
                       <div className="flex items-center justify-center text-sm font-medium text-gray-500 group-hover:text-blue-600 transition-colors">
                         <span>Get started</span>
                         <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
@@ -234,7 +253,8 @@ const Dashboard = () => {
                       Q4 Strategic Planning
                     </h3>
                     <p className="text-gray-600 text-sm mb-4">
-                      Quarterly planning session with strategic goals, budget allocation, and team expansion plans.
+                      Quarterly planning session with strategic goals, budget
+                      allocation, and team expansion plans.
                     </p>
                     <div className="flex items-center text-sm font-medium text-gray-500 group-hover:text-blue-600 transition-colors">
                       <Plus className="h-4 w-4 mr-1" />
@@ -245,7 +265,10 @@ const Dashboard = () => {
                 </Card>
               </Link>
 
-              <Link to="/brief-generator?type=product-roadmap" className="group">
+              <Link
+                to="/brief-generator?type=product-roadmap"
+                className="group"
+              >
                 <Card className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 opacity-5 group-hover:opacity-10 transition-opacity"></div>
                   <CardContent className="relative p-6">
@@ -256,7 +279,8 @@ const Dashboard = () => {
                       Product Roadmap Review
                     </h3>
                     <p className="text-gray-600 text-sm mb-4">
-                      Feature prioritization, timeline adjustments, and product development strategy review.
+                      Feature prioritization, timeline adjustments, and product
+                      development strategy review.
                     </p>
                     <div className="flex items-center text-sm font-medium text-gray-500 group-hover:text-purple-600 transition-colors">
                       <Plus className="h-4 w-4 mr-1" />
@@ -278,7 +302,8 @@ const Dashboard = () => {
                       Custom Brief
                     </h3>
                     <p className="text-gray-600 text-sm mb-4">
-                      Start with a blank brief and customize it with your own sections and content.
+                      Start with a blank brief and customize it with your own
+                      sections and content.
                     </p>
                     <div className="flex items-center text-sm font-medium text-gray-500 group-hover:text-green-600 transition-colors">
                       <Plus className="h-4 w-4 mr-1" />
@@ -332,8 +357,12 @@ const Dashboard = () => {
                     <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
                       <FileText className="h-10 w-10 text-blue-500" />
                     </div>
-                    <p className="text-gray-500 mb-4 font-medium">No documents uploaded yet</p>
-                    <p className="text-gray-400 text-sm mb-6">Start by uploading your first document</p>
+                    <p className="text-gray-500 mb-4 font-medium">
+                      No documents uploaded yet
+                    </p>
+                    <p className="text-gray-400 text-sm mb-6">
+                      Start by uploading your first document
+                    </p>
                     <Link to="/upload">
                       <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg">
                         <Upload className="h-4 w-4 mr-2" />
@@ -344,7 +373,10 @@ const Dashboard = () => {
                 ) : (
                   <div className="space-y-3">
                     {documents.slice(0, 3).map((doc) => (
-                      <div key={doc.id} className="group p-4 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-blue-200 transition-all duration-200">
+                      <div
+                        key={doc.id}
+                        className="group p-4 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-blue-200 transition-all duration-200"
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
                             <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
@@ -371,7 +403,10 @@ const Dashboard = () => {
                     {documents.length > 3 && (
                       <div className="text-center pt-4">
                         <Link to="/upload">
-                          <Button variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                          <Button
+                            variant="ghost"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
                             View all {documents.length} documents →
                           </Button>
                         </Link>
@@ -419,7 +454,9 @@ const Dashboard = () => {
                 ) : briefs.length === 0 ? (
                   <div className="text-center py-8">
                     <Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500">No briefs yet. Create your first brief!</p>
+                    <p className="text-gray-500">
+                      No briefs yet. Create your first brief!
+                    </p>
                     <Link to="/brief-generator">
                       <Button variant="outline" className="mt-4">
                         <Plus className="h-4 w-4 mr-2" />
@@ -430,7 +467,10 @@ const Dashboard = () => {
                 ) : (
                   <div className="space-y-3">
                     {briefs.slice(0, 3).map((brief) => (
-                      <div key={brief.id} className="group p-4 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-purple-200 transition-all duration-200">
+                      <div
+                        key={brief.id}
+                        className="group p-4 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-purple-200 transition-all duration-200"
+                      >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
@@ -460,7 +500,10 @@ const Dashboard = () => {
                     ))}
                     {briefs.length > 3 && (
                       <div className="text-center pt-4">
-                        <Button variant="ghost" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50">
+                        <Button
+                          variant="ghost"
+                          className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                        >
                           View all {briefs.length} briefs →
                         </Button>
                       </div>

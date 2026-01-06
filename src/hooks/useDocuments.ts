@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface Document {
   id: string;
@@ -20,14 +20,14 @@ export const useDocuments = () => {
   const { toast } = useToast();
 
   const { data: documents = [], isLoading } = useQuery({
-    queryKey: ['documents', user?.id],
+    queryKey: ["documents", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
+
       const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("documents")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as Document[];
@@ -37,48 +37,50 @@ export const useDocuments = () => {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File): Promise<string> => {
-      if (!user) throw new Error('User not authenticated');
+      if (!user) throw new Error("User not authenticated");
 
       // Generate unique file path
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${file.name}`;
       const filePath = `${user.id}/${fileName}`;
 
       // Upload file to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('documents')
+        .from("documents")
         .upload(filePath, file);
 
       if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        throw new Error(uploadError.message || 'Failed to upload file to storage');
+        console.error("Storage upload error:", uploadError);
+        throw new Error(
+          uploadError.message || "Failed to upload file to storage"
+        );
       }
 
       // Create document record in database
       const { data: docData, error: docError } = await supabase
-        .from('documents')
+        .from("documents")
         .insert({
           user_id: user.id,
           filename: file.name,
-          file_type: file.type || 'application/octet-stream',
+          file_type: file.type || "application/octet-stream",
           file_size: file.size,
           storage_path: filePath,
-          status: 'pending' // Will be processed by Edge Function
+          status: "pending", // Will be processed by Edge Function
         })
         .select()
         .single();
 
       if (docError) {
-        console.error('Database insert error:', docError);
+        console.error("Database insert error:", docError);
         // Try to clean up the uploaded file
-        await supabase.storage.from('documents').remove([filePath]);
-        throw new Error(docError.message || 'Failed to save document record');
+        await supabase.storage.from("documents").remove([filePath]);
+        throw new Error(docError.message || "Failed to save document record");
       }
 
       return docData.id;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast({
         title: "Upload completed",
         description: "Your document has been successfully uploaded.",
@@ -96,14 +98,14 @@ export const useDocuments = () => {
   const deleteMutation = useMutation({
     mutationFn: async (documentId: string) => {
       const { error } = await supabase
-        .from('documents')
+        .from("documents")
         .delete()
-        .eq('id', documentId);
+        .eq("id", documentId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast({
         title: "Document deleted",
         description: "The document has been removed from your uploads.",
@@ -119,7 +121,7 @@ export const useDocuments = () => {
   });
 
   const refetch = () => {
-    queryClient.invalidateQueries({ queryKey: ['documents'] });
+    queryClient.invalidateQueries({ queryKey: ["documents"] });
   };
 
   return {
