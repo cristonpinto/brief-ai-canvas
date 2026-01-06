@@ -314,29 +314,6 @@ brief-ai-canvas/
    - Update Site URL and Redirect URLs
 
 📚 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
-
----
-
-## 📊 Architecture
-
-```mermaid
-graph TD
-    A[User Browser] -->|HTTPS| B[Vercel Frontend]
-    B -->|Auth| C[Supabase Auth]
-    B -->|Storage| D[Supabase Storage]
-    B -->|Database| E[PostgreSQL]
-    B -->|Edge Functions| F[Supabase Functions]
-    F -->|AI Processing| G[Google Gemini AI]
-    E -->|Vector Search| H[pgvector]
-```
-
-### Data Flow
-
-1. **Document Upload** → Storage → Database record created
-2. **Processing** → Edge Function extracts text → Creates chunks with embeddings
-3. **AI Chat** → Retrieves relevant chunks → Sends to Gemini → Returns answer
-4. **Brief Generation** → Aggregates chunks → Structures with AI → Saves to database
-
 ---
 
 ## 🔧 Configuration
